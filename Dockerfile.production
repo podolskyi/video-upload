@@ -1,0 +1,24 @@
+FROM ubuntu:16.04
+
+ADD Dockerfile-prepare.sh /Dockerfile-prepare.sh
+RUN bash /Dockerfile-prepare.sh
+RUN rm /Dockerfile-prepare.sh
+
+RUN python3 -m virtualenv --python=python3 /virtualenv
+
+RUN mkdir /video-upload
+
+ADD requirements.txt /requirements.txt
+RUN /virtualenv/bin/pip install -r /requirements.txt
+
+RUN mkdir /video-upload/video_upload
+RUN touch /video-upload/video_upload/__init__.py
+ADD setup.py /video-upload/setup.py
+
+WORKDIR /video-upload
+RUN /virtualenv/bin/python setup.py develop
+
+RUN rm -rf /video-upload/video_upload
+ADD alembic /video-upload/alembic
+ADD video_upload /video-upload/video_upload
+ADD alembic.ini /video-upload/alembic.ini
